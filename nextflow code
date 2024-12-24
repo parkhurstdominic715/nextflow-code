@@ -1,0 +1,80 @@
+#!/usr/bin/env nextflow
+
+// Define input channels
+Channel.from('sample1', 'sample2').set { samples }
+Channel.from('condition1', 'condition2').set { conditions }
+Channel.from('extra1', 'extra2').set { extras }
+Channel.from('flag1', 'flag2').set { flags }
+Channel.from('param1', 'param2').set { params }
+Channel.from('type1', 'type2').set { types }
+Channel.of('input1').set { input1 }
+Channel.of('input2').set { input2 }
+Channel.of('input3').set { input3 }
+Channel.of('input4').set { input4 }
+Channel.of('input5').set { input5 }
+Channel.of('input6').set { input6 }
+Channel.of('input7').set { input7 }
+Channel.of('input8').set { input8 }
+Channel.of('input9').set { input9 }
+Channel.of('input10').set { input10 }
+
+// Define the function to check conditions
+def checkSampleCondition(sample, condition) {
+    if (sample == 'sample1' && (condition == 'condition1' || condition == 'condition2')) {
+        return "${sample} meets the condition"
+    } else {
+        return "${sample} does not meet the condition"
+    }
+}
+
+// Process using the function with additional inputs
+process checkConditions {
+    input:
+    val sample from samples
+    val condition from conditions
+    val extra from extras
+    val flag from flags
+    val param from params
+    val type from types
+    val input1
+    val input2
+    val input3
+    val input4
+    val input5
+    val input6
+    val input7
+    val input8
+    val input9
+    val input10
+
+    output:
+    val result into results
+
+    script:
+    """
+    result=\$(checkSampleCondition ${sample} ${condition})
+    echo \${result}
+    """
+}
+
+// Workflow with additional logic
+workflow {
+    samples.view { sample ->
+        if (sample == 'sample1' && flags.contains('flag1')) {
+            println "${sample} meets the first condition with AND"
+        } else {
+            println "${sample} does not meet the first condition"
+        }
+    }
+
+    types.view { type ->
+        if ((type == 'type1') ^ (params.contains('param2'))) {
+            println "${type} meets the XOR condition"
+        } else {
+            println "${type} does not meet the XOR condition"
+        }
+    }
+
+    // Ensure the process is executed
+    checkConditions()
+}
